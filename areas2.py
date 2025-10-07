@@ -1,53 +1,78 @@
 import streamlit as st
-import matplotlib.pyplot as plt
-from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
-import numpy as np
+import math
 
-# Funciones de dibujo de miniaturas
-def dibujar_minatura(figura):
-    fig, ax = plt.subplots(figsize=(2, 2), dpi=100)
-    ax.set_aspect('equal')
-    ax.axis('off')
+def calcular_area(figura, valores):
+    """Devuelve el área de la figura geométrica."""
     if figura == "cuadrado":
-        l = 1
-        square = plt.Rectangle((0, 0), l, l, fill=False, edgecolor="black", linewidth=3)
-        ax.add_patch(square)
-        ax.set_xlim(-0.2, 1.2)
-        ax.set_ylim(-0.2, 1.2)
+        lado = valores["lado"]
+        return lado ** 2
     elif figura == "triangulo":
-        tri = plt.Polygon([(0,0), (1,0), (0.5,0.866)], fill=None, edgecolor="black", linewidth=3)
-        ax.add_patch(tri)
-        ax.set_xlim(-0.2, 1.2)
-        ax.set_ylim(-0.2, 1.0)
+        base = valores["base"]
+        altura = valores["altura"]
+        return (base * altura) / 2
+    elif figura == "rectangulo":
+        base = valores["base"]
+        altura = valores["altura"]
+        return base * altura
     elif figura == "circulo":
-        circ = plt.Circle((0.5,0.5), 0.4, fill=False, edgecolor="black", linewidth=3)
-        ax.add_patch(circ)
-        ax.set_xlim(-0.2, 1.2)
-        ax.set_ylim(-0.2, 1.2)
-    return fig
+        radio = valores["radio"]
+        return math.pi * (radio ** 2)
+    else:
+        raise ValueError("Figura no válida")
 
-# Título y secciones
-st.title("Galería decorativa de figuras")
+def calcular_perimetro(figura, valores):
+    """Devuelve el perímetro de la figura geométrica."""
+    if figura == "cuadrado":
+        lado = valores["lado"]
+        return 4 * lado
+    elif figura == "triangulo":
+        base = valores["base"]
+        return 3 * base  # Triángulo equilátero
+    elif figura == "rectangulo":
+        base = valores["base"]
+        altura = valores["altura"]
+        return 2 * (base + altura)
+    elif figura == "circulo":
+        radio = valores["radio"]
+        return 2 * math.pi * radio
+    else:
+        raise ValueError("Figura no válida")
 
-# Sección principal (sin interacción, solo entradas para cálculo si quieres)
-st.write("Estas son las figuras subidas, mostradas como adorno.")
-# Aquí podrías dejar el bloque para subir imágenes si quieres, o usar las ya existentes.
+def main():
+    # Crear columnas para título e imagen
+    col1, col2 = st.columns([3, 1])
+    with col1:
+        st.title("Calculadora de área y perímetro de figuras geométricas")
+    with col2:
+        st.image("imagen5.png", width=120)
 
-# Galería decorativa en la parte inferior
-st.markdown("---")
-st.subheader("Figuras decorativas")
-cols = st.columns(3)
+    st.sidebar.header("Selección de figura")
+    figura_opciones = {
+        "Cuadrado": "cuadrado",
+        "Triángulo": "triangulo",
+        "Rectángulo": "rectangulo",
+        "Círculo": "circulo"
+    }
+    eleccion = st.sidebar.selectbox("Elige la figura", list(figura_opciones.keys()))
+    figura = figura_opciones[eleccion]
 
-figuras = ["cuadrado", "triangulo", "circulo"]
-for idx, figura in enumerate(figuras):
-    with cols[idx]:
-        fig = dibujar_minatura(figura)
-        canvas = fig.canvas
-        buf = canvas.tostring_rgb()
-        height, width = fig.canvas.get_width_height()
-        import PIL.Image as PILImage
-        image = PILImage.fromarray(np.asarray(fig.canvas.buffer_rgba())[...,[0,1,2,3]])
-        st.image(image, caption=figura.capitalize(), use_column_width=True)
+    st.sidebar.markdown("---")
+    st.sidebar.write("Ajusta las dimensiones en la sección principal.")
 
-st.markdown("---")
-st.caption("Notas: estas son imágenes decorativas. Si quieres que sean interactives, dime y las convertimos en thumbnails clicables.")
+    valores = {}
+
+    # Entradas dinámicas según la figura
+    if figura == "cuadrado":
+        valores["lado"] = st.number_input("Lado del cuadrado (cm)", min_value=0.0, value=5.0, step=0.1)
+
+    elif figura == "triangulo":
+        valores["base"] = st.number_input("Base del triángulo (cm)", min_value=0.0, value=5.0, step=0.1)
+        valores["altura"] = st.number_input("Altura (cm)", min_value=0.0, value=4.0, step=0.1)
+        st.caption("Nota: se asume triángulo equilátero para el cálculo del perímetro.")
+
+    elif figura == "rectangulo":
+        valores["base"] = st.number_input("Base del rectángulo (cm)", min_value=0.0, value=6.0, step=0.1)
+        valores["altura"] = st.number_input("Altura (cm)", min_value=0.0, value=3.0, step=0.1)
+
+    elif figura == "circulo":
+        valores["radio"] = st.number_input("Radio del círculo (cm)", min_v)
